@@ -1,0 +1,10 @@
+runs
+images
+detections
+temp.*
+*.pt
+*.mp4
+*.jpg
+*.png
+*.zarr
+*.txt

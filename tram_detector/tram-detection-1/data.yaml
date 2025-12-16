@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['tram']
+
+roboflow:
+  workspace: new-workspace-5mbpa
+  project: tram-detection-ebsat
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/new-workspace-5mbpa/tram-detection-ebsat/dataset/1
