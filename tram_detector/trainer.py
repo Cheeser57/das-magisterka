@@ -32,7 +32,7 @@ def train(model_weights, data_yaml, epochs=50, batch=16, imgsz=720, project="run
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--api_key", required=True, default="WwWi5GIvzTkGby6RpB6v")
+	parser.add_argument("--api_key", required=True, default="")
 	parser.add_argument("--workspace", default="new-workspace-5mbpa")
 	parser.add_argument("--project", default="tram-detection-ebsat")
 	parser.add_argument("--version", type=int, default=1)
