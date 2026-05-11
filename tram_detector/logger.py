@@ -180,7 +180,8 @@ def logger(
     """
     Run YOLO tram detection on a video and write timestamps to a CSV.
 
-    CSV columns: location, time_start, time_end, direction, class, footage_id
+    CSV columns: event_id, location, time_start, time_end, direction, class, footage_id
+    event_id is a globally rising integer across all logger() runs on the same log file.
     """
     if footage_id is None:
         footage_id = os.path.splitext(os.path.basename(video_filename))[0]
@@ -200,8 +201,17 @@ def logger(
     print(f"FPS: {fps}, Total frames: {total_frames}")
 
     if reset_log:
+        event_counter = 0
         with open(log_filename, "w") as f:
-            f.write("location,time_start,time_end,direction,class,footage_id\n")
+            f.write("event_id,location,time_start,time_end,direction,class,footage_id\n")
+    else:
+        # continue numbering from max existing event_id
+        try:
+            import pandas as _pd
+            _existing = _pd.read_csv(log_filename)
+            event_counter = int(_existing["event_id"].max()) + 1 if "event_id" in _existing.columns and len(_existing) > 0 else 0
+        except Exception:
+            event_counter = 0
 
     max_age_frames = int(unseen_seconds_to_end * fps)
     tracker   = SimpleTracker(max_age_frames=max_age_frames, dist_threshold=dist_threshold, dt_seconds=frame_delta)
@@ -217,9 +227,10 @@ def logger(
             direction = "unknown"
         else:
             direction = "right" if dx > 0 else "left"
-        t_start = track.time_start.isoformat(sep=' ', timespec='milliseconds')
-        t_end   = track.time_last_seen.isoformat(sep=' ', timespec='milliseconds')
-        entry   = f"{location},{t_start},{t_end},{direction},{class_name},{footage_id}\n"
+        t_start  = track.time_start.isoformat(sep=' ', timespec='milliseconds')
+        t_end    = track.time_last_seen.isoformat(sep=' ', timespec='milliseconds')
+        event_id = getattr(track, 'event_id', -1)
+        entry    = f"{event_id},{location},{t_start},{t_end},{direction},{class_name},{footage_id}\n"
         with open(log_filename, "a") as f:
             f.write(entry)
         if verbose:
@@ -257,17 +268,16 @@ def logger(
                     to_remove.append(t)
             tracker.tracks = [t for t in tracker.tracks if t not in to_remove]
 
-            save_frame = False
             for t in tracker.tracks:
                 if t.class_name == class_name and t.isNew:
-                    t.isNew = False
-                    save_frame = True
+                    t.isNew     = False
+                    t.event_id  = event_counter
+                    event_counter += 1
                     if verbose:
-                        print(f"Detected: ID={t.id}, time={t.time_start}")
-            if save_frame:
-                annotated = annotator.annotate(frame, detections)
-                label = "{:02d}-{:02d}".format(int(current_frame//fps//60), int(current_frame//fps%60))
-                cv2.imwrite(os.path.join(img_dir, f"frame_{label}.jpg"), annotated)
+                        print(f"Detected: event_id={t.event_id}, time={t.time_start}")
+                    annotated = annotator.annotate(frame, detections)
+                    ts = "{:02d}-{:02d}".format(int(current_frame//fps//60), int(current_frame//fps%60))
+                    cv2.imwrite(os.path.join(img_dir, f"event_{t.event_id:04d}_{ts}.jpg"), annotated)
 
             pbar.update(1)
 
