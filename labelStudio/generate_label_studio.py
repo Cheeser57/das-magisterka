@@ -28,6 +28,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+try:
+    from labelStudio.filter_display_lab import DOMAINS, DISPLAY_MODES, chain_filters
+except ImportError:
+    from filter_display_lab import DOMAINS, DISPLAY_MODES, chain_filters
+
 # ── Defaults anchored to project root ────────────────────────────────────────
 _ROOT          = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DAS_FILE      = os.path.join(_ROOT, "das", "recorded.nc")
@@ -69,7 +74,10 @@ def generate_tasks(
     px_per_sample  = 0.1,
     max_img_dim    = 4000,
     colormap       = "RdBu_r",
-    vpercentile    = 99,
+    domain         = "strain",
+    steps          = None,
+    display_mode   = "global_p99",
+    locations      = None,
 ):
     """
     Generate Label Studio PNG images and tasks.json for all events in log_path.
@@ -87,6 +95,16 @@ def generate_tasks(
     offsets_file  : path to footage_offsets.csv produced by calibrate().
     output_dir    : directory where images/ and tasks.json are written.
     time_margin   : seconds of DAS context shown before/after each event.
+    domain        : "strain" (raw, default) or "strain_rate" (differentiated
+                    first) — see labelStudio.filter_display_lab.DOMAINS.
+    steps         : optional filter chain applied before rendering, e.g.
+                    [("median", {"t_kernel": 9, "d_kernel": 3})] — same format
+                    as labelStudio.filter_display_lab.chain_filters/pipeline_view.
+    display_mode  : normalization applied before imshow — see
+                    labelStudio.filter_display_lab.DISPLAY_MODES.
+    locations     : optional list of location names — restrict to only these
+                    rows of log_path (e.g. locations=["pcss"]). None (default)
+                    processes every location present in the log.
     """
     import xdas
 
@@ -117,10 +135,17 @@ def generate_tasks(
     locs.columns = locs.columns.str.strip()
     locs = locs.set_index("id")
 
+    # Label set is always derived from the FULL log, even when `locations`
+    # restricts which rows get (re)rendered below -- so label_config.xml
+    # never narrows just because one location was refreshed in isolation.
     class_col = "class" if "class" in log.columns else None
     classes   = sorted(log[class_col].dropna().unique()) if class_col else ["object"]
     label_config_xml = _make_label_config(classes)
     print(f"Labels: {classes}")
+
+    if locations is not None:
+        log = log[log["location"].isin(locations)]
+        print(f"Restricting to location(s) {list(locations)}: {len(log)} event(s)")
 
     # ── Load and index offsets ────────────────────────────────────────────────
     offsets = {}
@@ -160,7 +185,7 @@ def generate_tasks(
         try:
             shape = _make_image(
                 das_data, win_start, win_end, dist_start, dist_end, img_path,
-                colormap, vpercentile, px_per_channel, px_per_sample, max_img_dim,
+                colormap, domain, steps, display_mode, px_per_channel, px_per_sample, max_img_dim,
             )
             offset_tag = f"  (offset {offset_sec:+.2f}s)" if offset_sec else ""
             print(f"  [{idx:02d}] {img_name}  ({shape[1]}×{shape[0]}){offset_tag}")
@@ -170,6 +195,18 @@ def generate_tasks(
 
         cls = row[class_col] if class_col and pd.notna(row.get(class_col)) else "object"
         tasks.append(_build_task(idx, row, t_start, t_end, img_path, win_start, win_end, cls))
+
+    # ── Merge into existing tasks.json when only some locations were (re)rendered ──
+    # so refreshing e.g. locations=["pcss"] updates just those images/entries
+    # without dropping other locations' tasks already present in the file.
+    if locations is not None and os.path.exists(tasks_file):
+        with open(tasks_file) as f:
+            existing_tasks = json.load(f)
+        refreshed_ids = {t["data"]["event_id"] for t in tasks}
+        tasks = sorted(
+            [t for t in existing_tasks if t["data"]["event_id"] not in refreshed_ids] + tasks,
+            key=lambda t: t["data"]["event_id"],
+        )
 
     # ── Write outputs ─────────────────────────────────────────────────────────
     with open(tasks_file, "w") as f:
@@ -187,17 +224,20 @@ def generate_tasks(
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
 def _make_image(das_data, win_start, win_end, dist_start, dist_end,
-                img_path, colormap, vpercentile, px_per_channel, px_per_sample, max_img_dim):
+                img_path, colormap, domain, steps, display_mode,
+                px_per_channel, px_per_sample, max_img_dim):
     da = das_data.sel(
         time=slice(win_start.isoformat(), win_end.isoformat()),
         distance=slice(float(dist_start), float(dist_end)),
     )
-    arr = da.values
+    base = DOMAINS[domain](da)
+    filtered = chain_filters(base, steps) if steps else base
+    arr = filtered.values if hasattr(filtered, "values") else np.asarray(filtered)
 
     finite = arr[np.isfinite(arr)]
     if finite.size == 0:
         raise ValueError("No finite values in selected slice")
-    vmax = np.percentile(np.abs(finite), vpercentile)
+    shown, vmin, vmax = DISPLAY_MODES[display_mode](arr.astype(np.float64))
 
     n_time, n_dist = arr.shape
     img_w = min(max_img_dim, max(400, int(n_dist * px_per_channel)))
@@ -205,7 +245,7 @@ def _make_image(das_data, win_start, win_end, dist_start, dist_end,
 
     dpi = 100
     fig, ax = plt.subplots(figsize=(img_w / dpi, img_h / dpi), dpi=dpi)
-    ax.imshow(arr, aspect="auto", cmap=colormap, vmin=-vmax, vmax=vmax,
+    ax.imshow(shown, aspect="auto", cmap=colormap, vmin=vmin, vmax=vmax,
               interpolation="nearest", origin="upper")
     ax.axis("off")
     fig.subplots_adjust(left=0, right=1, top=1, bottom=0)

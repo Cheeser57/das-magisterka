@@ -2,5 +2,6 @@
   <Image name="image" value="$image" zoom="true" zoomControl="true"/>
   <RectangleLabels name="label" toName="image">
     <Label value="tram" background="#FF8800"/>
+    <Label value="truck" background="#0099FF"/>
   </RectangleLabels>
 </View>

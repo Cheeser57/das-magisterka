@@ -30,7 +30,7 @@ _OFFSETS_FILE  = os.path.join(_ROOT, "labeling", "footage_offsets.csv")
 
 def list_footage(log_path=_LOG_CSV):
     """Print available footage IDs and their event counts."""
-    log = pd.read_csv(log_path, parse_dates=["time_start", "time_end"])
+    log = pd.read_csv(log_path, parse_dates=["time_start", "time_end"], encoding='utf-8')
     if "footage_id" not in log.columns:
         print("No footage_id column in log — all events will be treated as one group.")
         return
@@ -78,8 +78,8 @@ def calibrate(
     import matplotlib.widgets as mwidgets
     import xdas
 
-    log  = pd.read_csv(log_path, parse_dates=["time_start", "time_end"])
-    locs = pd.read_csv(locations_csv, skipinitialspace=True)
+    log  = pd.read_csv(log_path, parse_dates=["time_start", "time_end"], encoding='utf-8')
+    locs = pd.read_csv(locations_csv, skipinitialspace=True, encoding='utf-8')
     locs.columns = locs.columns.str.strip()
     locs = locs.set_index("id")
 
@@ -106,8 +106,13 @@ def calibrate(
         subset = log[log["footage_id"] == footage_id]
     else:
         subset = log
+
+    # Filter to only tram class events
+    if "class" in subset.columns:
+        subset = subset[subset["class"] == "tram"]
+
     if subset.empty:
-        raise ValueError(f"No events found for footage_id='{footage_id}'")
+        raise ValueError(f"No tram events found for footage_id='{footage_id}'")
 
     events = subset.sample(min(n_samples, len(subset)), random_state=42).reset_index(drop=True)
 

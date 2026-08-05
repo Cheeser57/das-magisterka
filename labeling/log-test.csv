@@ -1,0 +1,22 @@
+event_id,location,time_start,time_end,direction,class,footage_id
+1,most_mieszka,2025-08-06 13:21:31.660,2025-08-06 13:21:31.660,unknown,truck,most_mieszka_06-08-13-20
+0,most_mieszka,2025-08-06 13:21:30.920,2025-08-06 13:21:31.900,right,truck,most_mieszka_06-08-13-20
+2,most_mieszka,2025-08-06 13:21:48.440,2025-08-06 13:21:48.440,unknown,truck,most_mieszka_06-08-13-20
+3,most_mieszka,2025-08-06 13:21:56.560,2025-08-06 13:22:04.080,right,tram,most_mieszka_06-08-13-20
+4,most_mieszka,2025-08-06 13:22:55.940,2025-08-06 13:22:56.240,right,truck,most_mieszka_06-08-13-20
+5,most_mieszka,2025-08-06 13:23:08.400,2025-08-06 13:23:08.400,unknown,truck,most_mieszka_06-08-13-20
+6,most_mieszka,2025-08-06 13:23:28.760,2025-08-06 13:23:28.980,left,truck,most_mieszka_06-08-13-20
+7,most_mieszka,2025-08-06 13:23:37.880,2025-08-06 13:23:41.120,right,truck,most_mieszka_06-08-13-20
+8,most_mieszka,2025-08-06 13:23:58.960,2025-08-06 13:24:30.100,unknown,tram,most_mieszka_06-08-13-20
+9,most_mieszka,2025-08-06 13:24:54.940,2025-08-06 13:24:55.700,right,truck,most_mieszka_06-08-13-20
+10,most_mieszka,2025-08-06 13:25:02.520,2025-08-06 13:25:03.780,right,truck,most_mieszka_06-08-13-20
+11,most_mieszka,2025-08-06 13:25:29.480,2025-08-06 13:25:31.880,left,truck,most_mieszka_06-08-13-20
+12,most_mieszka,2025-08-06 13:25:56.340,2025-08-06 13:25:56.900,right,truck,most_mieszka_06-08-13-20
+13,most_mieszka,2025-08-06 13:26:11.860,2025-08-06 13:26:14.140,left,tram,most_mieszka_06-08-13-20
+14,most_mieszka,2025-08-06 13:26:20.000,2025-08-06 13:26:34.300,left,truck,most_mieszka_06-08-13-20
+15,most_mieszka,2025-08-06 13:26:43.860,2025-08-06 13:26:57.640,right,tram,most_mieszka_06-08-13-20
+16,most_mieszka,2025-08-06 13:28:09.260,2025-08-06 13:28:23.320,left,tram,most_mieszka_06-08-13-20
+17,most_mieszka,2025-08-06 13:29:16.240,2025-08-06 13:29:17.640,right,truck,most_mieszka_06-08-13-20
+18,most_mieszka,2025-08-06 13:29:24.460,2025-08-06 13:29:24.640,right,truck,most_mieszka_06-08-13-20
+19,most_mieszka,2025-08-06 13:29:29.760,2025-08-06 13:29:30.580,right,truck,most_mieszka_06-08-13-20
+20,most_mieszka,2025-08-06 13:30:23.400,2025-08-06 13:30:24.700,left,truck,most_mieszka_06-08-13-20

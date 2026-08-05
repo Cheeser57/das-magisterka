@@ -1,4 +1,6 @@
-id," start"," end"
-pcss,500,700
-estkowskiego,1600,2000
-most_mieszka,930,1000 
+id," start"," end",is_forward
+pcss,300,450,true
+estkowskiego,1400,1520,true
+most_mieszka,920,"1000 ",true
+srodka,500,600,false
+garbary,2500,2750,false

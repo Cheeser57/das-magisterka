@@ -1,3 +1,4 @@
+event_id,location,time_start,time_end,direction,class,footage_id
 0,estkowskiego,2025-08-06 13:44:43.800,2025-08-06 13:44:43.820,unknown,tram,estkowskiego_06-08-13-42
 1,estkowskiego,2025-08-06 13:44:44.680,2025-08-06 13:44:47.080,left,tram,estkowskiego_06-08-13-42
 2,estkowskiego,2025-08-06 13:47:46.500,2025-08-06 13:47:47.340,right,tram,estkowskiego_06-08-13-42
@@ -27,4 +28,4 @@
 2,most_mieszka,2025-08-06 13:24:25.000,2025-08-06 13:24:29.620,right,tram,most_mieszka_06-08-13-20
 3,most_mieszka,2025-08-06 13:26:48.420,2025-08-06 13:26:57.200,right,tram,most_mieszka_06-08-13-20
 4,most_mieszka,2025-08-06 13:28:13.380,2025-08-06 13:28:17.840,left,tram,most_mieszka_06-08-13-20
-0,œródka,2025-08-06 17:07:41.520,2025-08-06 17:07:41.680,left,tram,œródka_06-08-17-00
+0,ï¿½rï¿½dka,2025-08-06 17:07:41.520,2025-08-06 17:07:41.680,left,tram,ï¿½rï¿½dka_06-08-17-00
